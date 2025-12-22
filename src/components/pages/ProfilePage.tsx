@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { User, Mail, Calendar, Shield } from 'lucide-react';
 import { useMember } from '@/integrations';
-import { MemberProtectedRoute } from '@/components/ui/member-protected-route';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { format } from 'date-fns';
@@ -183,8 +182,6 @@ function ProfilePageContent() {
 
 export default function ProfilePage() {
   return (
-    <MemberProtectedRoute>
-      <ProfilePageContent />
-    </MemberProtectedRoute>
+    <ProfilePageContent />
   );
 }

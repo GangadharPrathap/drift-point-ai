@@ -4,7 +4,6 @@ import { Upload, CheckCircle, AlertCircle } from 'lucide-react';
 import { BaseCrudService } from '@/integrations';
 import { KartRegistrations } from '@/entities';
 import { useMember } from '@/integrations';
-import { MemberProtectedRoute } from '@/components/ui/member-protected-route';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -280,8 +279,6 @@ function RegisterKartPageContent() {
 
 export default function RegisterKartPage() {
   return (
-    <MemberProtectedRoute messageToSignIn="Sign in to register your kart">
-      <RegisterKartPageContent />
-    </MemberProtectedRoute>
+    <RegisterKartPageContent />
   );
 }

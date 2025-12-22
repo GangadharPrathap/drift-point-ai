@@ -30,15 +30,27 @@ const router = createBrowserRouter([
       },
       {
         path: "register-kart",
-        element: <RegisterKartPage />,
+        element: (
+          <MemberProtectedRoute messageToSignIn="Sign in to register your kart">
+            <RegisterKartPage />
+          </MemberProtectedRoute>
+        ),
       },
       {
         path: "dashboard",
-        element: <DashboardPage />,
+        element: (
+          <MemberProtectedRoute messageToSignIn="Sign in to access your AI Pit Crew dashboard">
+            <DashboardPage />
+          </MemberProtectedRoute>
+        ),
       },
       {
         path: "profile",
-        element: <ProfilePage />,
+        element: (
+          <MemberProtectedRoute>
+            <ProfilePage />
+          </MemberProtectedRoute>
+        ),
       },
       {
         path: "*",

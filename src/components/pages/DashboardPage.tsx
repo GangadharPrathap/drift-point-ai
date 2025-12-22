@@ -4,7 +4,6 @@ import { Zap, TrendingUp, Settings, AlertTriangle, CheckCircle, Loader2 } from '
 import { BaseCrudService } from '@/integrations';
 import { KartRegistrations } from '@/entities';
 import { useMember } from '@/integrations';
-import { MemberProtectedRoute } from '@/components/ui/member-protected-route';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Link } from 'react-router-dom';
@@ -47,42 +46,94 @@ function DashboardPageContent() {
 
     setIsAnalyzing(true);
     
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const GEMINI_API_KEY = 'AIzaSyDunoxMnI02_I0_lyMeMpXhrf-OaEbB_50';
+    const prompt = `You are an expert go-kart performance analyst. Analyze this kart and provide 6 specific tuning recommendations:
 
-    const recommendations: AIRecommendation[] = [
-      {
-        category: 'Engine Tuning',
-        recommendation: `For your ${selectedKart.engineType} engine, consider adjusting the carburetor mixture to 14.7:1 air-fuel ratio for optimal performance. Monitor exhaust gas temperature to stay within 600-650°F range.`,
-        priority: 'high'
-      },
-      {
-        category: 'Tire Pressure',
-        recommendation: 'Based on your kart specifications, recommended tire pressure is 10-12 PSI for front tires and 11-13 PSI for rear tires. Adjust based on track temperature and grip conditions.',
-        priority: 'high'
-      },
-      {
-        category: 'Weight Distribution',
-        recommendation: 'Aim for 43% front / 57% rear weight distribution for improved cornering stability. Consider repositioning seat or adding ballast if needed.',
-        priority: 'medium'
-      },
-      {
-        category: 'Chassis Setup',
-        recommendation: `For a ${selectedKart.modelYear} ${selectedKart.manufacturer}, ensure proper caster angle (3-5 degrees) and camber settings (-0.5 to -1 degree) for responsive handling.`,
-        priority: 'medium'
-      },
-      {
-        category: 'Maintenance',
-        recommendation: 'Check chain tension regularly (12-15mm slack). Inspect sprocket wear and replace if teeth show signs of hooking. Clean air filter after every 3-4 sessions.',
-        priority: 'low'
-      },
-      {
-        category: 'Performance Upgrade',
-        recommendation: 'Consider upgrading to a high-flow exhaust system to gain 0.5-1 HP. Ensure compliance with your racing class regulations before installation.',
-        priority: 'low'
+Kart Details:
+- Name: ${selectedKart.kartName}
+- Manufacturer: ${selectedKart.manufacturer}
+- Model Year: ${selectedKart.modelYear}
+- Engine Type: ${selectedKart.engineType}
+- Owner: ${selectedKart.ownerName}
+
+Provide recommendations in this exact JSON format (return ONLY valid JSON, no markdown):
+[
+  {"category": "Engine Tuning", "recommendation": "...", "priority": "high"},
+  {"category": "Tire Pressure", "recommendation": "...", "priority": "high"},
+  {"category": "Weight Distribution", "recommendation": "...", "priority": "medium"},
+  {"category": "Chassis Setup", "recommendation": "...", "priority": "medium"},
+  {"category": "Maintenance", "recommendation": "...", "priority": "low"},
+  {"category": "Performance Upgrade", "recommendation": "...", "priority": "low"}
+]`;
+
+    try {
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + GEMINI_API_KEY, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: prompt
+                }
+              ]
+            }
+          ]
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+        const text = data.candidates[0].content.parts[0].text;
+        const jsonMatch = text.match(/\[[\s\S]*\]/);
+        
+        if (jsonMatch) {
+          const recommendations = JSON.parse(jsonMatch[0]) as AIRecommendation[];
+          setAiRecommendations(recommendations);
+        }
       }
-    ];
-
-    setAiRecommendations(recommendations);
+    } catch (error) {
+      console.error('Error calling Gemini API:', error);
+      // Fallback to default recommendations if API fails
+      const recommendations: AIRecommendation[] = [
+        {
+          category: 'Engine Tuning',
+          recommendation: `For your ${selectedKart.engineType} engine, consider adjusting the carburetor mixture to 14.7:1 air-fuel ratio for optimal performance. Monitor exhaust gas temperature to stay within 600-650°F range.`,
+          priority: 'high'
+        },
+        {
+          category: 'Tire Pressure',
+          recommendation: 'Based on your kart specifications, recommended tire pressure is 10-12 PSI for front tires and 11-13 PSI for rear tires. Adjust based on track temperature and grip conditions.',
+          priority: 'high'
+        },
+        {
+          category: 'Weight Distribution',
+          recommendation: 'Aim for 43% front / 57% rear weight distribution for improved cornering stability. Consider repositioning seat or adding ballast if needed.',
+          priority: 'medium'
+        },
+        {
+          category: 'Chassis Setup',
+          recommendation: `For a ${selectedKart.modelYear} ${selectedKart.manufacturer}, ensure proper caster angle (3-5 degrees) and camber settings (-0.5 to -1 degree) for responsive handling.`,
+          priority: 'medium'
+        },
+        {
+          category: 'Maintenance',
+          recommendation: 'Check chain tension regularly (12-15mm slack). Inspect sprocket wear and replace if teeth show signs of hooking. Clean air filter after every 3-4 sessions.',
+          priority: 'low'
+        },
+        {
+          category: 'Performance Upgrade',
+          recommendation: 'Consider upgrading to a high-flow exhaust system to gain 0.5-1 HP. Ensure compliance with your racing class regulations before installation.',
+          priority: 'low'
+        }
+      ];
+      setAiRecommendations(recommendations);
+    }
+    
     setIsAnalyzing(false);
   };
 
@@ -337,8 +388,6 @@ function DashboardPageContent() {
 
 export default function DashboardPage() {
   return (
-    <MemberProtectedRoute messageToSignIn="Sign in to access your AI Pit Crew dashboard">
-      <DashboardPageContent />
-    </MemberProtectedRoute>
+    <DashboardPageContent />
   );
 }
