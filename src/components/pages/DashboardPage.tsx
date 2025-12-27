@@ -46,7 +46,7 @@ function DashboardPageContent() {
 
     setIsAnalyzing(true);
     
-    const GEMINI_API_KEY = 'AIzaSyDunoxMnI02_I0_lyMeMpXhrf-OaEbB_50';
+    const GEMINI_API_KEY = 'AIzaSyCdRR1hwpcPJOowTryrxWg_Uj2jRYh6Vbw';
     const prompt = `You are an expert go-kart performance analyst. Analyze this kart and provide 6 specific tuning recommendations:
 
 Kart Details:
